@@ -1,0 +1,105 @@
+{
+    "name": "crm.zoom",
+    "version": "1.1.0",
+    "vendor": "crm",
+    "author": "Anton Barinov",
+    "author_url": "https://github.com/Anton-Barinov",
+    "title": "Zoom Meetings — видеовстречи",
+    "description": "Подключение Zoom Server-to-Server OAuth для создания встреч из CRM и добавления их в календарь. Записи и транскрипты пока не поддерживаются.",
+    "core_version": ">=1.0.0",
+    "license": "MIT",
+    "category": "integration",
+    "dependencies": [],
+    "require_permissions": [
+        "settings.view",
+        "settings.edit",
+        "calendar.view",
+        "calendar.edit"
+    ],
+    "service_provider": "Module\\Crm\\Zoom\\ZoomServiceProvider",
+    "migrations": "api/migrations",
+    "api_routes": "api/config/routes.php",
+    "web_routes": "web/config/routes.php",
+    "menu_items": [
+        {
+            "id": "zoom",
+            "title": "Zoom Meetings",
+            "route": "zoom",
+            "icon": "video",
+            "permission": "calendar.view"
+        }
+    ],
+    "assets": {
+        "css": [
+            "web/assets/css/zoom.css"
+        ],
+        "js_routes": {
+            "module-zoom": "web/assets/js/zoom.js"
+        }
+    },
+    "mcp_tools": [
+        {
+            "name": "zoom_status",
+            "description": "Показать состояние настроек Zoom в активном рабочем пространстве. Секреты не возвращаются.",
+            "handler": "Module\\Crm\\Zoom\\Mcp\\ZoomStatusTool",
+            "permissions": [
+                "calendar.view"
+            ],
+            "mode": "all",
+            "workspace_required": true,
+            "input_schema": {
+                "type": "object",
+                "properties": [],
+                "additionalProperties": false
+            }
+        },
+        {
+            "name": "zoom_create_meeting",
+            "description": "Создать Zoom-встречу и соответствующее событие календаря CRM. Требует подключённый Zoom Server-to-Server app и стабильный ключ идемпотентности для безопасных повторов.",
+            "handler": "Module\\Crm\\Zoom\\Mcp\\ZoomCreateMeetingTool",
+            "permissions": [
+                "calendar.edit"
+            ],
+            "mode": "all",
+            "workspace_required": true,
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "topic": {
+                        "type": "string",
+                        "description": "Тема онлайн-встречи Zoom"
+                    },
+                    "start_time": {
+                        "type": "string",
+                        "description": "Будущее время начала в ISO 8601 с часовым поясом"
+                    },
+                    "duration": {
+                        "type": "integer",
+                        "minimum": 15,
+                        "maximum": 480,
+                        "description": "Длительность встречи в минутах; от 15 до 480"
+                    },
+                    "agenda": {
+                        "type": "string",
+                        "description": "Повестка или описание встречи"
+                    },
+                    "timezone": {
+                        "type": "string",
+                        "description": "Часовой пояс IANA, например Europe/Moscow"
+                    },
+                    "idempotency_key": {
+                        "type": "string",
+                        "description": "Стабильный ключ 16–128 символов для повторного вызова той же операции без создания дубля"
+                    }
+                },
+                "required": [
+                    "topic",
+                    "start_time",
+                    "idempotency_key"
+                ],
+                "additionalProperties": false
+            }
+        }
+    ],
+    "signature": "fca371a1c5267184076cebc198facf05f5c66e89c7a96b23b1c3f03dc8c9b8a4"
+}
